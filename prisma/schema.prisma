@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  discordId       String   @id
+  username        String
+  displayname     String?
+  avatarUrl       String?
+  collegeEmail    String?   // college email
+  collegeVerified Boolean   @default(false)
+  collegeCode     String?   // verification code for college email
+  mtVerified      Boolean   @default(false)  // monkeytype verified flag
+  mtUrl           String?
+  linkedinUrl     String?
+  XUrl            String?
+  instagramUrl    String?
+  githubUrl       String? 
+  createdAt       DateTime  @default(now())
+  scores          Score[]
+}
+
+model Score {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [discordId])
+  userId    String
+  testType  String
+  wpm       Float
+  accuracy  Float?
+  raw       Float?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, testType])
+}
+
+
