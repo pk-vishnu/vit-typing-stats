@@ -1,3 +1,5 @@
+/* For local development, puppeteer works cuz chrome is installed */
+
 // import { NextResponse } from "next/server";
 // import { getServerSession } from "next-auth";
 // import { authOptions } from "@/lib/auth";
@@ -53,6 +55,7 @@
 //   }
 // }
 
+/* using puppeteer-core and serverless chromium for prod */
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";

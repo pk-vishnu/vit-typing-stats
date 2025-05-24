@@ -16,7 +16,6 @@
     "next": "15.3.2",
     "next-auth": "^4.24.11",
     "nodemailer": "^6.10.1",
-    "puppeteer": "^24.9.0",
     "puppeteer-core": "^24.9.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
