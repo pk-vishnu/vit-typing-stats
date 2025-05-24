@@ -7,9 +7,24 @@ import toast, { Toaster } from "react-hot-toast";
 const TEST_TYPES = ["60", "30", "15"];
 const REFRESH_COOLDOWN_MS = 5 * 60 * 1000;
 
+type ScoreWithUser = {
+    wpm: number;
+    accuracy: number | null;
+    raw: number | null;
+    testType: string;
+    user: {
+        discordId: string;
+        displayname: string | null;
+        username: string;
+        avatarUrl: string | null;
+        mtVerified: boolean;
+        collegeVerified: boolean;
+    };
+};
+
 export default function LeaderboardPage() {
     const [testType, setTestType] = useState("60");
-    const [scores, setScores] = useState([]);
+    const [scores, setScores] = useState<ScoreWithUser[]>([]);
     const [canRefresh, setCanRefresh] = useState(true);
     const [cooldownRemaining, setCooldownRemaining] = useState(0);
 

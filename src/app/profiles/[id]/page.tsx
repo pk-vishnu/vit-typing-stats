@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+
 const SocialIcon = ({ label }: { label: string }) => {
     switch (label.toLowerCase()) {
         case "github":
@@ -26,9 +27,10 @@ const SocialIcon = ({ label }: { label: string }) => {
     }
 };
 
-export default async function UserProfile({ params }: { params: { id: string } }) {
+export default async function UserProfile({ params }: { params: Promise<{ id: string }> }) {
+    const userId = (await params).id;
     const user = await prisma.user.findUnique({
-        where: { discordId: params.id },
+        where: { discordId: userId },
         include: { scores: true },
     });
 
@@ -144,3 +146,4 @@ export default async function UserProfile({ params }: { params: { id: string } }
         </>
     );
 }
+
