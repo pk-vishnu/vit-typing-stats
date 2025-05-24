@@ -57,37 +57,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/primsa";
-
-// Use a more flexible type that works with both
-type BrowserLike = {
-  newPage(): Promise<any>;
-  close(): Promise<void>;
-};
-
-// Dynamic imports for puppeteer
-const getBrowser = async (): Promise<BrowserLike> => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  
-  if (isProduction) {
-    // Production/Vercel environment
-    const puppeteer = await import('puppeteer-core');
-    const chromium = await import('@sparticuz/chromium');
-    
-    return await puppeteer.default.launch({
-      args: chromium.default.args,
-      defaultViewport: chromium.default.defaultViewport,
-      executablePath: await chromium.default.executablePath(),
-      headless: chromium.default.headless,
-    });
-  } else {
-    // Local development environment
-    const puppeteer = await import('puppeteer');
-    
-    return await puppeteer.default.launch({
-      headless: true,
-    });
-  }
-};
+import puppeteer from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -101,14 +72,20 @@ export async function POST(req: Request) {
   }
 
   try {
-    const browser = await getBrowser();
+    const browser = await puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+    });
+
     const page = await browser.newPage();
     
     await page.goto(`https://monkeytype.com/profile/${username}`, {
       waitUntil: "networkidle2",
     });
     
-    const bioText = await page.$eval(".bio .value", (el: Element) => el.textContent?.trim());
+    const bioText = await page.$eval(".bio .value", (el) => el.textContent?.trim());
     await browser.close();
 
     if (!bioText || !bioText.includes("[VIT]")) {
