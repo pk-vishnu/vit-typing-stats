@@ -24,10 +24,16 @@ export async function POST(req: Request) {
       waitUntil: "networkidle2",
     });
     const bioText = await page.$eval(".bio .value", el => el.textContent?.trim());
-    console.log("Bio Text:", bioText);
     await browser.close();
 
     if (!bioText || !bioText.includes("[VIT]")) {
+      await prisma.user.update({
+        where: { discordId: session.user.id },
+        data: {
+          mtUrl: null,
+          mtVerified: false,
+        }
+      });
       return NextResponse.json({ error: "Verification tag '[VIT]' not found in bio." }, { status: 400 });
     }
 

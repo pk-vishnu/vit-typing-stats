@@ -1,13 +1,11 @@
 "use client";
 interface Props {
     editMode: boolean;
-    username: string;
     displayname: string;
     linkedinUrl: string;
     instagramUrl: string;
     XUrl: string;
     githubUrl: string;
-    setUsername: (v: string) => void;
     setDisplayname: (v: string) => void;
     setLinkedinUrl: (v: string) => void;
     setInstagramUrl: (v: string) => void;
@@ -17,13 +15,11 @@ interface Props {
 
 export default function BasicInfoSection({
     editMode,
-    username,
     displayname,
     linkedinUrl,
     instagramUrl,
     XUrl,
     githubUrl,
-    setUsername,
     setDisplayname,
     setLinkedinUrl,
     setInstagramUrl,
@@ -31,7 +27,6 @@ export default function BasicInfoSection({
     setGithubUrl,
 }: Props) {
     const fields = [
-        { label: "Username", value: username, setter: setUsername },
         { label: "Display Name", value: displayname, setter: setDisplayname },
         { label: "LinkedIn", value: linkedinUrl, setter: setLinkedinUrl },
         { label: "Instagram", value: instagramUrl, setter: setInstagramUrl },
@@ -40,21 +35,40 @@ export default function BasicInfoSection({
     ];
 
     return (
-        <>
-            {fields.map(({ label, value, setter }) => (
-                <div key={label} className="my-4">
-                    <label className="block text-sm">{label}</label>
-                    {editMode ? (
-                        <input
-                            value={value}
-                            onChange={(e) => setter(e.target.value)}
-                            className="w-full border border-gray-300 p-1 rounded"
-                        />
-                    ) : (
-                        <p>{value}</p>
-                    )}
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center">
+                    <span className="text-white text-lg">🧾</span>
                 </div>
-            ))}
-        </>
+                <div>
+                    <h3 className="text-lg font-semibold text-white">Basic Information</h3>
+                    <p className="text-sm text-gray-400">
+                        Update your personal details used for display and verification
+                    </p>
+                </div>
+            </div>
+
+            {/* Fields */}
+            <div className="space-y-4">
+                {fields.map(({ label, value, setter }) => (
+                    <div key={label} className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-300">{label}</label>
+                        {editMode ? (
+                            <input
+                                value={value}
+                                onChange={(e) => setter(e.target.value)}
+                                className="w-full bg-gray-800/50 border border-gray-700/50 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all duration-200"
+                            />
+                        ) : (
+                            <div className="bg-gray-800/30 rounded-xl px-4 py-3 border border-gray-700/30">
+                                <p className="text-gray-200">{value || "Not provided"}</p>
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+        </div>
+
     );
 }

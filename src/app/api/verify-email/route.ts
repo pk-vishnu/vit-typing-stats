@@ -23,7 +23,7 @@ export async function POST(req: Request){
             collegeCode:code,
         }
     })
-    console.log(process.env.EMAIL_USER, process.env.EMAIL_PASS);
+
     // send mail with code
     const transporter = nodemailer.createTransport({
         service: "gmail",
