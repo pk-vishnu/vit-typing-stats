@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
 };
 module.exports = {
   images: {
@@ -10,7 +9,7 @@ module.exports = {
         protocol: "https",
         hostname: "cdn.discordapp.com",
         port: "",
-        pathname: "/avatars/**", // this pattern allows all avatars
+        pathname: "/avatars/**",
       },
     ],
   },
