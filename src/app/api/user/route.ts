@@ -4,7 +4,7 @@ import prisma from "@/lib/primsa";
 import { authOptions } from "../auth/[...nextauth]/route";
 
 // GET req to fetch user data using DiscordID(which you can get from session)
-export async function GET(req:Request){
+export async function GET(){
     const session = await getServerSession(authOptions);
     if(!session) return NextResponse.json({error: "Unauthorized"}, {status: 401});
     const user = await prisma.user.findUnique({
@@ -87,7 +87,7 @@ export async function PATCH(req: Request) {
 }
 
 // DELETE req to delete user data
-export async function DELETE(req: Request){
+export async function DELETE(){
     const session = await getServerSession(authOptions);
     if(!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     try{

@@ -10,12 +10,10 @@ const REFRESH_COOLDOWN_MS = 5 * 60 * 1000;
 export default function LeaderboardPage() {
     const [testType, setTestType] = useState("60");
     const [scores, setScores] = useState([]);
-    const [loading, setLoading] = useState(false);
     const [canRefresh, setCanRefresh] = useState(true);
     const [cooldownRemaining, setCooldownRemaining] = useState(0);
 
     useEffect(() => {
-        setLoading(true);
         const fetchScores = async () => {
             try {
                 const res = await fetch(`/api/leaderboard?testType=${testType}`);
@@ -28,8 +26,6 @@ export default function LeaderboardPage() {
             } catch (error) {
                 console.error("Fetch error:", error);
                 setScores([]);
-            } finally {
-                setLoading(false);
             }
         };
 

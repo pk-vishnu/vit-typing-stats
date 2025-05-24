@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Score } from "@prisma/client";
 import prisma from "@/lib/primsa";
 
 export async function GET(req: NextRequest) {
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest) {
       take: 50, 
     });
 
-    const formatted = scores.map((score:any) => ({
+    const formatted = scores.map((score:Score) => ({
       wpm: score.wpm,
       accuracy: score.accuracy,
       raw: score.raw,

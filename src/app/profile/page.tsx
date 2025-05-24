@@ -24,7 +24,6 @@ export default function Profile() {
     const [githubUrl, setGithubUrl] = useState("");
     const [verificationCode, setVerificationCode] = useState("");
     const [mtVerified, setMTverified] = useState(false);
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -47,7 +46,7 @@ export default function Profile() {
     }, [session]);
 
     if (status === "loading") return <p>Loading...</p>;
-    if (!session) return <p>You're not signed in.</p>;
+    if (!session) return <p>You&apos;re not signed in.</p>;
 
     const handleSave = async () => {
         const res = await fetch("/api/user", {
@@ -103,8 +102,6 @@ export default function Profile() {
 
     const handleVerifyMt = async () => {
         const toastId = toast.loading("Verifying profile...");
-        setLoading(true);
-
         try {
             const res = await fetch("/api/verify-monkeytype", {
                 method: "POST",
@@ -121,10 +118,9 @@ export default function Profile() {
                 toast.error("Failed to verify Monkeytype profile.");
             }
         } catch (err) {
+            console.log(err);
             toast.dismiss(toastId);
             toast.error("Something went wrong.");
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -184,7 +180,7 @@ export default function Profile() {
                                     </label>
                                     <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/30">
                                         <p className="text-sm font-mono text-gray-200 break-all text-center">
-                                            {session.user.name}
+                                            {username}
                                         </p>
                                     </div>
                                 </div>

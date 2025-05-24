@@ -56,6 +56,7 @@ export default function BasicInfoSection({
                         <label className="block text-sm font-medium text-gray-300">{label}</label>
                         {editMode ? (
                             <input
+                                placeholder={label + " username"}
                                 value={value}
                                 onChange={(e) => setter(e.target.value)}
                                 className="w-full bg-gray-800/50 border border-gray-700/50 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 focus:outline-none transition-all duration-200"

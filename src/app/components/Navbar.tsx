@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useEffect, useState, useRef } from "react";
 import { signOut } from "next-auth/react";
@@ -40,7 +41,7 @@ function Navbar() {
 
     const handleComingSoon = () => {
         return toast("Coming Soon!");
-    }
+    };
 
     return (
         <>
@@ -49,15 +50,15 @@ function Navbar() {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         {/* Logo / Title */}
-                        <a href="/" className="text-lg font-semibold text-white hover:text-gray-400 transition">
+                        <Link href="/" className="text-lg font-semibold text-white hover:text-gray-400 transition">
                             VIT Typing Stats
-                        </a>
+                        </Link>
 
                         {/* Desktop Menu */}
                         <div className="hidden md:flex items-center space-x-6 text-gray-300">
                             <a href="/" onClick={handleComingSoon} className="hover:text-gray-400 transition">Events</a>
                             <a href="/" onClick={handleComingSoon} className="hover:text-gray-400 transition">Guilds</a>
-                            <a href="/leaderboard" className="hover:text-gray-400 transition">Leaderboards</a>
+                            <Link href="/leaderboard" className="hover:text-gray-400 transition">Leaderboards</Link>
 
                             {status === "authenticated" ? (
                                 <>
@@ -68,14 +69,14 @@ function Navbar() {
                                     <div className="relative" ref={dropdownRef}>
                                         <button onClick={() => setDropdownOpen(!dropdownOpen)} className="flex items-center gap-2 focus:outline-none">
                                             <img
-                                                src={session.user.image || "/default-avatar.png"}
+                                                src={session.user?.image || "/default-avatar.png"}
                                                 alt="User avatar"
                                                 className="w-8 h-8 rounded-full border border-gray-700"
                                             />
                                         </button>
                                         {dropdownOpen && (
                                             <div className="absolute right-0 mt-2 w-48 bg-gray-900 border border-gray-700 rounded-lg shadow-lg z-50">
-                                                <a href="/profile" className="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-t-md transition">Profile</a>
+                                                <Link href="/profile" className="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-t-md transition">Profile</Link>
                                                 <button
                                                     onClick={() => signOut({ callbackUrl: "/" })}
                                                     className="w-full text-left px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-b-md transition"
@@ -104,11 +105,11 @@ function Navbar() {
                         <div className="md:hidden mt-2 space-y-1 text-gray-300">
                             <a href="/" onClick={handleComingSoon} className="block px-4 py-2 hover:bg-gray-800 rounded transition">Events</a>
                             <a href="/" onClick={handleComingSoon} className="block px-4 py-2 hover:bg-gray-800 rounded transition">Guilds</a>
-                            <a href="/leaderboard" className="block px-4 py-2 hover:bg-gray-800 rounded transition">Leaderboards</a>
+                            <Link href="/leaderboard" className="block px-4 py-2 hover:bg-gray-800 rounded transition">Leaderboards</Link>
 
                             {status === "authenticated" ? (
                                 <>
-                                    <a href="/profile" className="block px-4 py-2 hover:bg-gray-800 rounded transition">Profile</a>
+                                    <Link href="/profile" className="block px-4 py-2 hover:bg-gray-800 rounded transition">Profile</Link>
                                     <button
                                         onClick={() => signOut({ callbackUrl: "/" })}
                                         className="w-full text-left px-4 py-2 hover:bg-gray-800 rounded transition"
@@ -124,7 +125,7 @@ function Navbar() {
                 </div>
             </nav>
         </>
-    )
+    );
 }
 
 export default Navbar;

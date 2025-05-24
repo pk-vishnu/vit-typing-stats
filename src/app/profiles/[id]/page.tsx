@@ -34,10 +34,22 @@ export default async function UserProfile({ params }: { params: { id: string } }
     if (!user) return notFound();
 
     const socialLinks = [
-        { label: "LinkedIn", url: user.linkedinUrl },
-        { label: "Twitter/X", url: user.XUrl },
-        { label: "Instagram", url: user.instagramUrl },
-        { label: "GitHub", url: user.githubUrl },
+        {
+            label: "LinkedIn",
+            url: user.linkedinUrl ? `https://www.linkedin.com/in/${user.linkedinUrl}` : null,
+        },
+        {
+            label: "Twitter/X",
+            url: user.XUrl ? `https://twitter.com/${user.XUrl}` : null,
+        },
+        {
+            label: "Instagram",
+            url: user.instagramUrl ? `https://instagram.com/${user.instagramUrl}` : null,
+        },
+        {
+            label: "GitHub",
+            url: user.githubUrl ? `https://github.com/${user.githubUrl}` : null,
+        },
         { label: "Monkeytype", url: user.mtUrl ? `https://monkeytype.com/profile/${user.mtUrl}` : null },
     ];
 
