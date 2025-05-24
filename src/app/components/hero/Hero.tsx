@@ -1,4 +1,5 @@
 "use client"
+import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 
 const Hero = () => {
@@ -70,12 +71,12 @@ const Hero = () => {
                             />
                         </svg>
 
-                        <a href="https://discord.gg/c6x6AYm8">
+                        <Link href="https://discord.gg/c6x6AYm8">
                             <span className="ml-4 flex items-start flex-col leading-none">
                                 <span className="text-xs text-gray-400 mb-1">Join the Discord Server</span>
                                 <span className="title-font font-medium text-gray-300">VIT Typing Club</span>
                             </span>
-                        </a>
+                        </Link>
                     </button>
 
                     {/* View Leaderboard Button */}
@@ -108,12 +109,12 @@ const Hero = () => {
       S8.807,38.987,11.013,38.987z"/>
                             </g>
                         </svg>
-                        <a href='/leaderboard'>
+                        <Link href='/leaderboard'>
                             <span className="ml-4 flex items-start flex-col leading-none">
                                 <span className="text-xs text-gray-400 mb-1">Compete With VITians</span>
                                 <span className="title-font font-medium">Leaderboards</span>
                             </span>
-                        </a>
+                        </Link>
                     </button>
 
                 </div>

@@ -9,6 +9,7 @@ import {
     Globe,
     Instagram,
 } from "lucide-react";
+import Link from "next/link";
 
 const SocialIcon = ({ label }: { label: string }) => {
     switch (label.toLowerCase()) {
@@ -102,7 +103,7 @@ export default async function UserProfile({ params }: { params: { id: string } }
                             <div className="flex flex-wrap gap-4">
                                 {socialLinks.map(({ label, url }) =>
                                     url ? (
-                                        <a
+                                        <Link
                                             key={label}
                                             href={url}
                                             target="_blank"
@@ -111,7 +112,7 @@ export default async function UserProfile({ params }: { params: { id: string } }
                                         >
                                             <SocialIcon label={label} />
                                             <span className="text-sm font-medium">{label}</span>
-                                        </a>
+                                        </Link>
                                     ) : null
                                 )}
                             </div>

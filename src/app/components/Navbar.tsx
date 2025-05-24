@@ -50,15 +50,27 @@ function Navbar() {
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         {/* Logo / Title */}
-                        <Link href="/" className="text-lg font-semibold text-white hover:text-gray-400 transition">
-                            VIT Typing Stats
+                        <Link href="/">
+                            <p className="text-lg font-semibold text-white hover:text-gray-400 transition">
+                                VIT Typing Stats
+                            </p>
                         </Link>
 
                         {/* Desktop Menu */}
                         <div className="hidden md:flex items-center space-x-6 text-gray-300">
-                            <a href="/" onClick={handleComingSoon} className="hover:text-gray-400 transition">Events</a>
-                            <a href="/" onClick={handleComingSoon} className="hover:text-gray-400 transition">Guilds</a>
-                            <Link href="/leaderboard" className="hover:text-gray-400 transition">Leaderboards</Link>
+                            <Link href="/">
+                                <p onClick={handleComingSoon} className="hover:text-gray-400 transition">
+                                    Events
+                                </p>
+                            </Link>
+                            <Link href="/">
+                                <p onClick={handleComingSoon} className="hover:text-gray-400 transition">
+                                    Guilds
+                                </p>
+                            </Link>
+                            <Link href="/leaderboard">
+                                <p className="hover:text-gray-400 transition">Leaderboards</p>
+                            </Link>
 
                             {status === "authenticated" ? (
                                 <>
@@ -76,7 +88,11 @@ function Navbar() {
                                         </button>
                                         {dropdownOpen && (
                                             <div className="absolute right-0 mt-2 w-48 bg-gray-900 border border-gray-700 rounded-lg shadow-lg z-50">
-                                                <Link href="/profile" className="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-t-md transition">Profile</Link>
+                                                <Link href="/profile">
+                                                    <p className="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-t-md transition">
+                                                        Profile
+                                                    </p>
+                                                </Link>
                                                 <button
                                                     onClick={() => signOut({ callbackUrl: "/" })}
                                                     className="w-full text-left px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-b-md transition"
@@ -103,13 +119,25 @@ function Navbar() {
                     {/* Mobile Dropdown Menu */}
                     {dropdownOpen && (
                         <div className="md:hidden mt-2 space-y-1 text-gray-300">
-                            <a href="/" onClick={handleComingSoon} className="block px-4 py-2 hover:bg-gray-800 rounded transition">Events</a>
-                            <a href="/" onClick={handleComingSoon} className="block px-4 py-2 hover:bg-gray-800 rounded transition">Guilds</a>
-                            <Link href="/leaderboard" className="block px-4 py-2 hover:bg-gray-800 rounded transition">Leaderboards</Link>
+                            <Link href="/">
+                                <p onClick={handleComingSoon} className="block px-4 py-2 hover:bg-gray-800 rounded transition">
+                                    Events
+                                </p>
+                            </Link>
+                            <Link href="/">
+                                <p onClick={handleComingSoon} className="block px-4 py-2 hover:bg-gray-800 rounded transition">
+                                    Guilds
+                                </p>
+                            </Link>
+                            <Link href="/leaderboard">
+                                <p className="block px-4 py-2 hover:bg-gray-800 rounded transition">Leaderboards</p>
+                            </Link>
 
                             {status === "authenticated" ? (
                                 <>
-                                    <Link href="/profile" className="block px-4 py-2 hover:bg-gray-800 rounded transition">Profile</Link>
+                                    <Link href="/profile">
+                                        <p className="block px-4 py-2 hover:bg-gray-800 rounded transition">Profile</p>
+                                    </Link>
                                     <button
                                         onClick={() => signOut({ callbackUrl: "/" })}
                                         className="w-full text-left px-4 py-2 hover:bg-gray-800 rounded transition"
