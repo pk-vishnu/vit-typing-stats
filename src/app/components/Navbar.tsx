@@ -5,7 +5,6 @@ import { useEffect, useState, useRef } from "react";
 import { signOut } from "next-auth/react";
 import LoginButton from "./LoginButton";
 import toast, { Toaster } from "react-hot-toast";
-import Image from "next/image";
 
 function Navbar() {
     const { data: session, status } = useSession();
