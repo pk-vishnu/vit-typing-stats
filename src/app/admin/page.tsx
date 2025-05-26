@@ -9,10 +9,13 @@ export default function AdminPage() {
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
-        if (session?.user.id === process.env.NEXT_PUBLIC_ADMIN_ID) {
-            setIsAdmin(true);
+        if (session && session.user) {
+            if (session.user.id === process.env.NEXT_PUBLIC_ADMIN_ID) {
+                setIsAdmin(true);
+            }
         }
     }, [session]);
+
 
     if (status === "loading") return <p>Loading...</p>;
     if (!isAdmin) return <p>Access denied.</p>;

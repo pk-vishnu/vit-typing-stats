@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import prisma from "@/lib/primsa";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 // GET req to fetch user data using DiscordID(which you can get from session)
-export async function GET(req:Request){
+export async function GET(){
     const session = await getServerSession(authOptions);
     if(!session) return NextResponse.json({error: "Unauthorized"}, {status: 401});
     const user = await prisma.user.findUnique({
@@ -36,7 +36,6 @@ export async function PATCH(req: Request) {
 
   const body = await req.json();
 
-  // Only allow updating these fields (safe fields)
   const {
     collegeEmail,
     mtUrl,
@@ -49,6 +48,19 @@ export async function PATCH(req: Request) {
   } = body;
 
   try {
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        discordId: session.user.id,
+      },
+    });
+
+    if (!existingUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const isMtUrlChanged = mtUrl && mtUrl !== existingUser.mtUrl;
+    const isCollegeEmailChanged = collegeEmail && collegeEmail !== existingUser.collegeEmail;
+
     const user = await prisma.user.update({
       where: {
         discordId: session.user.id,
@@ -62,6 +74,8 @@ export async function PATCH(req: Request) {
         instagramUrl,
         XUrl,
         githubUrl,
+        ...(isMtUrlChanged && { mtVerified: false }),
+        ...(isCollegeEmailChanged && { collegeVerified: false }),
       },
     });
 
@@ -70,4 +84,27 @@ export async function PATCH(req: Request) {
     console.error("User update failed:", error);
     return NextResponse.json({ error: "Update failed" }, { status: 500 });
   }
+}
+
+// DELETE req to delete user data
+export async function DELETE(){
+    const session = await getServerSession(authOptions);
+    if(!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    try{
+      await prisma.score.deleteMany({
+        where:{
+          userId: session.user.id,
+        }
+      });
+
+      await prisma.user.delete({
+        where:{
+          discordId: session.user.id,
+        }
+      });
+      return NextResponse.json({ message: "User Deleted Successfully."});
+    }catch(error){
+      console.error("User deletion failed:", error);
+      return NextResponse.json({ error: "Deletion failed" }, { status: 500 });
+    } 
 }
