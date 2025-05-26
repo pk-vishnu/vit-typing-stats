@@ -1,5 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Score } from "@prisma/client";
 import prisma from "@/lib/primsa";
+
+type ScoreWithUser = Score & {
+  user: {
+    discordId: string;
+    displayname: string | null;
+    username: string;
+    avatarUrl: string | null;
+    mtVerified: boolean;
+    collegeVerified: boolean;
+  };
+};
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -28,7 +40,7 @@ export async function GET(req: NextRequest) {
       take: 50, 
     });
 
-    const formatted = scores.map((score:any) => ({
+    const formatted = scores.map((score:ScoreWithUser) => ({
       wpm: score.wpm,
       accuracy: score.accuracy,
       raw: score.raw,

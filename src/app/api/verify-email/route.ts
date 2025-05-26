@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/primsa";
 import nodemailer from "nodemailer";
 
@@ -23,7 +23,7 @@ export async function POST(req: Request){
             collegeCode:code,
         }
     })
-    console.log(process.env.EMAIL_USER, process.env.EMAIL_PASS);
+
     // send mail with code
     const transporter = nodemailer.createTransport({
         service: "gmail",
