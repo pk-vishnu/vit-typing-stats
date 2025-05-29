@@ -29,21 +29,27 @@ export default function LeaderboardPage() {
     const [cooldownRemaining, setCooldownRemaining] = useState(0);
 
     useEffect(() => {
+        const toastId = "loading-scores";
+
+        toast.loading("Loading Leaderboard...", { id: toastId });
+
         const fetchScores = async () => {
             try {
                 const res = await fetch(`/api/leaderboard?testType=${testType}`);
                 if (res.ok) {
                     const data = await res.json();
                     setScores(data.scores);
+                    toast.dismiss(toastId);
+                    toast.success("Scores loaded successfully!", { id: toastId });
                 } else {
                     setScores([]);
                 }
             } catch (error) {
-                console.error("Fetch error:", error);
+                toast.dismiss(toastId);
+                toast.error("Something went wrong.", { id: toastId });
                 setScores([]);
             }
         };
-
         fetchScores();
     }, [testType]);
 
