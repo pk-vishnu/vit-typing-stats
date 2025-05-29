@@ -46,6 +46,7 @@ export default function LeaderboardPage() {
                 }
             } catch (error) {
                 toast.dismiss(toastId);
+                console.log("Error fetching scores:", error);
                 toast.error("Something went wrong.", { id: toastId });
                 setScores([]);
             }
