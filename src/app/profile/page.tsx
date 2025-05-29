@@ -27,19 +27,29 @@ export default function Profile() {
 
     useEffect(() => {
         const fetchUserData = async () => {
-            const res = await fetch("/api/user");
-            if (res.ok) {
-                const data = await res.json();
-                setUsername(data.username || "");
-                setDisplayname(data.displayname || "");
-                setEmail(data.collegeEmail || "");
-                setCollegeVerified(data.collegeVerified === true);
-                setMtUrl(data.mtUrl || "");
-                setLinkedinUrl(data.linkedinUrl || "");
-                setInstagramUrl(data.instagramUrl || "");
-                setXUrl(data.XUrl || "");
-                setGithubUrl(data.githubUrl || "");
-                setMTverified(data.mtVerified === true);
+            const toastId = toast.loading("Loading profile...");
+            try {
+                const res = await fetch("/api/user");
+                if (res.ok) {
+                    const data = await res.json();
+                    setUsername(data.username || "");
+                    setDisplayname(data.displayname || "");
+                    setEmail(data.collegeEmail || "");
+                    setCollegeVerified(data.collegeVerified === true);
+                    setMtUrl(data.mtUrl || "");
+                    setLinkedinUrl(data.linkedinUrl || "");
+                    setInstagramUrl(data.instagramUrl || "");
+                    setXUrl(data.XUrl || "");
+                    setGithubUrl(data.githubUrl || "");
+                    setMTverified(data.mtVerified === true);
+
+                    toast.success("Profile loaded!", { id: toastId });
+                } else {
+                    toast.error("Failed to load profile.", { id: toastId });
+                }
+            } catch (error) {
+                console.error(error);
+                toast.error("Something went wrong.", { id: toastId });
             }
         };
         fetchUserData();

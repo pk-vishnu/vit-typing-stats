@@ -91,6 +91,18 @@ export default async function UserProfile({ params }: { params: Promise<{ id: st
                                         <img src="/verified.png" alt="Logo" className="w-full h-full object-cover" />
                                     </div>
                                 </span>}
+                                {user.discordId === "943148172853776414" && (
+                                    <div
+                                        className="w-full h-6 overflow-hidden"
+                                        title="Reported or helped track down bugs in the Monkeytype Website"
+                                    >
+                                        <img
+                                            src="/bugHunter.png"
+                                            alt="Bug Hunter Badge"
+                                            className="w-full h-full object-contained"
+                                        />
+                                    </div>
+                                )}
                             </h1>
                             {user.collegeEmail && (
                                 <p className="text-gray-400 text-sm mt-1">College Email: {user.collegeEmail}</p>
@@ -142,7 +154,7 @@ export default async function UserProfile({ params }: { params: Promise<{ id: st
                         </div>
                     </div>
                 </div>
-            </div>
+            </div >
         </>
     );
 }
