@@ -84,7 +84,7 @@ export default function LeaderboardPage() {
     const handleManualRefresh = async () => {
         const toastId = toast.loading("Refreshing scores...");
         try {
-            const res = await fetch("/api/refresh-scores", { method: "POST" });
+            const res = await fetch("/api/update-personal-score", { method: "POST" });
             if (!res.ok) throw new Error();
             toast.success("Scores refreshed!", { id: toastId });
             localStorage.setItem("lastRefresh", Date.now().toString());
