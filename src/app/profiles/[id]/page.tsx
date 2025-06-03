@@ -104,8 +104,8 @@ export default async function UserProfile({ params }: { params: Promise<{ id: st
                                     </div>
                                 )}
                             </h1>
-                            {user.collegeEmail && (
-                                <p className="text-gray-400 text-sm mt-1">College Email: {user.collegeEmail}</p>
+                            {user.username && (
+                                <p className="text-gray-400 text-sm mt-1">Discord Username: {user.username}</p>
                             )}
                         </div>
                     </div>
