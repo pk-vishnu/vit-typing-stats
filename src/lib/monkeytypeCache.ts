@@ -101,9 +101,10 @@ class MonkeytypeCacheManager {
     };
   }
 
-  public async forceUpdate(): Promise<void> {
-    await this.updateCache();
-  }  private async updateCache(): Promise<void> {
+  public async forceUpdate(discordId?: string): Promise<void> {
+    await this.updateCache(discordId);
+  } 
+  private async updateCache(discordId?: string): Promise<void> {
     if (this.cache.isUpdating) {
       console.log('Cache update already in progress, skipping...');
       return;
@@ -117,13 +118,22 @@ class MonkeytypeCacheManager {
     }
 
     this.cache.isUpdating = true;
-    const startTime = Date.now();
+    const startTime = Date.now();    try {
+      console.log(`Starting Monkeytype cache update${discordId ? ' for single user' : ''}...`);
 
-    try {
-      console.log('Starting Monkeytype cache update...');
-
-      const users = await this.getVerifiedUsers();
-      console.log(`Found ${users.length} verified Monkeytype users`);
+      let users: Array<{ discordId: string; mtUrl: string }>;
+      
+      if (discordId) {
+        const user = await this.getVerifiedUser(discordId);
+        users = user ? [user] : [];
+        if (!user) {
+          console.log(`User ${discordId} not found or not verified`);
+        }
+      } else {
+        users = await this.getVerifiedUsers();
+      }
+      
+      console.log(`Found ${users.length} verified Monkeytype user(s) to update`);
 
       if (users.length === 0) {
         console.log('ℹNo verified users found, cache update complete');
@@ -184,6 +194,31 @@ class MonkeytypeCacheManager {
     }
     
     return results;
+  }
+
+  private async getVerifiedUser(discordId: string): Promise<{ discordId: string; mtUrl: string } | null> {
+    try {
+      const { default: prisma } = await import('@/lib/primsa');
+      
+      const user = await prisma.user.findUnique({
+        where: {
+          discordId,
+          mtVerified: true,
+          mtUrl: {
+            not: null,
+          },
+        },
+        select: {
+          discordId: true,
+          mtUrl: true,
+        },
+      });
+      
+      return user as { discordId: string; mtUrl: string } | null;
+    } catch (error) {
+      console.error('Failed to get verified user:', error);
+      return null;
+    }
   }
 
   private async getVerifiedUsers(): Promise<Array<{ discordId: string; mtUrl: string }>> {
@@ -413,11 +448,30 @@ class MonkeytypeCacheManager {
       await browser.close();
     }
   }
-
   private async updateDatabaseScores(discordId: string, scores: UserScore): Promise<void> {
     try {
-      const { default: prisma } = await import('@/lib/primsa');
+      const { default: prisma } = await import('@/lib/primsa'); 
+      const lastWrite = await prisma.score.findFirst({
+        where: { userId: discordId },
+        orderBy: { createdAt: 'desc' },
+        select: { createdAt: true }
+      });
 
+      const now = new Date();
+      const hoursSinceLastWrite = lastWrite 
+        ? (now.getTime() - lastWrite.createdAt.getTime()) / (1000 * 60 * 60) 
+        : 24;
+
+      // Only write to database if it's been at least 12 hours (twice per day)
+      // or if there's no previous record for this user
+      const DB_WRITE_INTERVAL_HOURS = 12;
+      
+      if (hoursSinceLastWrite < DB_WRITE_INTERVAL_HOURS) {
+        console.log(`Skipping database write for ${discordId} - last write was ${hoursSinceLastWrite.toFixed(1)} hours ago`);
+        return;
+      }
+
+      console.log(`Writing scores to database for ${discordId}`);
       const scoreMap = [
         { type: "60", wpm: scores.wpm60, raw: scores.raw60, accuracy: scores.acc60 },
         { type: "30", wpm: scores.wpm30, raw: scores.raw30, accuracy: scores.acc30 },
