@@ -78,6 +78,7 @@ export default function CacheMonitorPage() {
         toast.error("Failed to trigger update", { id: toastId });
       }
     } catch (error) {
+      console.error("Error triggering update:", error);
       toast.error("Error triggering update", { id: toastId });
     }
   };
