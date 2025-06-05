@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Score } from "@prisma/client";
 import prisma from "@/lib/primsa";
+import cacheManager from "@/lib/monkeytypeCache";
 
-type ScoreWithUser = Score & {
+type ScoreWithUser = {
+  wpm: number;
+  accuracy: number | null;
+  raw: number | null;
+  testType: string;
   user: {
     discordId: string;
     displayname: string | null;
@@ -18,6 +22,8 @@ export async function GET(req: NextRequest) {
   const testType = searchParams.get("testType") || "60";
 
   try {
+    const cacheStats = cacheManager.getCacheStats();
+
     const scores = await prisma.score.findMany({
       where: {
         testType,
@@ -48,7 +54,20 @@ export async function GET(req: NextRequest) {
       user: score.user,
     }));
 
-    return NextResponse.json({ scores: formatted });
+    return NextResponse.json({ 
+      scores: formatted,
+      meta: {
+        testType,
+        totalScores: formatted.length,
+        cacheStats: {
+          lastUpdate: cacheStats.lastGlobalUpdate,
+          userCount: cacheStats.userCount,
+          freshDataCount: cacheStats.freshDataCount,
+          nextUpdateIn: cacheStats.nextUpdateIn,
+          isUpdating: cacheStats.isUpdating,
+        }
+      }
+    });
   } catch (error) {
     console.error("Error fetching leaderboard:", error);
     return NextResponse.json({ error: "Failed to load leaderboard" }, { status: 500 });

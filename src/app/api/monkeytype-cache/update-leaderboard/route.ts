@@ -11,18 +11,9 @@ export async function POST() {
 
   try {
     await cacheManager.forceUpdate();
-    const stats = cacheManager.getCacheStats();
-    
-    return NextResponse.json({ 
-      message: "Cache updated successfully",
-      stats: {
-        userCount: stats.userCount,
-        freshDataCount: stats.freshDataCount,
-        lastUpdate: stats.lastGlobalUpdate,
-      }
-    });
-  } catch (err) {
-    console.error("Cache refresh failed", err);
-    return NextResponse.json({ error: "Failed to refresh cache" }, { status: 500 });
+    return NextResponse.json({ message: "Leaderboard cache update triggered successfully" });
+  } catch (error) {
+    console.error("Error updating leaderboard cache:", error);
+    return NextResponse.json({ error: "Failed to update leaderboard cache" }, { status: 500 });
   }
 }
