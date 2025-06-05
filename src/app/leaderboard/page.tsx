@@ -301,7 +301,8 @@ export default function LeaderboardPage() {
                     </div>                    {/* Footer Stats */}
                     <div className="mt-8 text-center space-y-2">
                         <p className="text-gray-600 text-sm">
-                            Showing top {scores.length} players • Updated automatically every 30 seconds
+                            Showing top {scores.length} players • Updated automatically every 2 minutes
+                            {cacheStats && cacheStats.isUpdating ? " (Updating...)" : ""}
                         </p>
                     </div>
                 </div >
