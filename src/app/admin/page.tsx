@@ -26,10 +26,13 @@ export default function AdminPage() {
         } else {
             alert("Failed to trigger cache update.");
         }
-    };
-
-    const handleUpdateLeaderboard = async () => {
-        alert("🚧 Leaderboard cache update not implemented yet.");
+    };    const handleUpdateLeaderboard = async () => {
+        const res = await fetch("/api/monkeytype-cache/update-leaderboard", { method: "POST" });
+        if (res.ok) {
+            alert("Leaderboard cache update triggered!");
+        } else {
+            alert("Failed to trigger leaderboard cache update.");
+        }
     };
 
     return (
