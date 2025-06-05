@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
+import Link from "next/link";
 
 export default function AdminPage() {
     const { data: session, status } = useSession();
@@ -18,14 +19,12 @@ export default function AdminPage() {
 
 
     if (status === "loading") return <p>Loading...</p>;
-    if (!isAdmin) return <p>Access denied.</p>;
-
-    const handleRefreshScores = async () => {
+    if (!isAdmin) return <p>Access denied.</p>;    const handleRefreshScores = async () => {
         const res = await fetch("/api/refresh-scores", { method: "POST" });
         if (res.ok) {
-            alert("Scores refreshed!");
+            alert("Cache update triggered!");
         } else {
-            alert("Failed to refresh scores.");
+            alert("Failed to trigger cache update.");
         }
     };
 
@@ -37,14 +36,18 @@ export default function AdminPage() {
         <>
             <Navbar />
             <div className="max-w-md mx-auto p-4">
-                <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
-
-                <button
+                <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>                <button
                     onClick={handleRefreshScores}
                     className="btn mb-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
                 >
-                    🔁 Refresh All Scores
+                    🔁 Force Cache Update
                 </button>
+
+                <Link href="/admin/cache">
+                    <button className="btn mb-4 w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded">
+                        📊 Cache Monitor
+                    </button>
+                </Link>
 
                 <button
                     onClick={handleUpdateLeaderboard}

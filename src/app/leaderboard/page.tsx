@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar";
 import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
 const TEST_TYPES = ["60", "30", "15"];
-const REFRESH_COOLDOWN_MS = 5 * 60 * 1000;
+const REFRESH_COOLDOWN_MS = 2 * 60 * 1000;
 
 type ScoreWithUser = {
     wpm: number;
@@ -22,33 +22,43 @@ type ScoreWithUser = {
     };
 };
 
+type CacheStats = {
+    lastUpdate: number;
+    userCount: number;
+    freshDataCount: number;
+    nextUpdateIn: number;
+    isUpdating: boolean;
+};
+
 export default function LeaderboardPage() {
     const [testType, setTestType] = useState("60");
     const [scores, setScores] = useState<ScoreWithUser[]>([]);
+    const [cacheStats, setCacheStats] = useState<CacheStats | null>(null);
     const [canRefresh, setCanRefresh] = useState(true);
     const [cooldownRemaining, setCooldownRemaining] = useState(0);
 
     useEffect(() => {
         const toastId = "loading-scores";
 
-        toast.loading("Loading Leaderboard...", { id: toastId });
-
-        const fetchScores = async () => {
+        toast.loading("Loading Leaderboard...", { id: toastId });        const fetchScores = async () => {
             try {
                 const res = await fetch(`/api/leaderboard?testType=${testType}`);
                 if (res.ok) {
                     const data = await res.json();
                     setScores(data.scores);
+                    setCacheStats(data.meta?.cacheStats || null);
                     toast.dismiss(toastId);
                     toast.success("Scores loaded successfully!", { id: toastId });
                 } else {
                     setScores([]);
+                    setCacheStats(null);
                 }
             } catch (error) {
                 toast.dismiss(toastId);
                 console.log("Error fetching scores:", error);
                 toast.error("Something went wrong.", { id: toastId });
                 setScores([]);
+                setCacheStats(null);
             }
         };
         fetchScores();
@@ -288,12 +298,10 @@ export default function LeaderboardPage() {
                                 <p className="text-gray-600 text-sm mt-2">Be the first to set a record!</p>
                             </div>
                         )}
-                    </div>
-
-                    {/* Footer Stats */}
-                    <div className="mt-8 text-center">
+                    </div>                    {/* Footer Stats */}
+                    <div className="mt-8 text-center space-y-2">
                         <p className="text-gray-600 text-sm">
-                            Showing top {scores.length} players • Updated in real-time
+                            Showing top {scores.length} players • Updated automatically every 30 seconds
                         </p>
                     </div>
                 </div >
