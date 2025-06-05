@@ -22,9 +22,7 @@ export async function POST() {
   try {
     const cachedData = cacheManager.getCachedUserData(user.discordId);
     const now = Date.now();
-    const FRESH_THRESHOLD = 30 * 1000;
-
-    if (cachedData && (now - cachedData.lastFetched) < FRESH_THRESHOLD) {
+    const FRESH_THRESHOLD = 30 * 1000;    if (cachedData && (now - cachedData.lastFetched) < FRESH_THRESHOLD) {
       return NextResponse.json({ 
         message: "Scores are already up to date",
         lastFetched: cachedData.lastFetched,
@@ -33,7 +31,7 @@ export async function POST() {
       });
     }
 
-    await cacheManager.forceUpdate();
+    await cacheManager.forceUpdate(user.discordId);
     
     const updatedData = cacheManager.getCachedUserData(user.discordId);
     
