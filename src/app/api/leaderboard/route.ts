@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
   const testType = searchParams.get("testType") || "60";
 
   try {
-    const cacheStats = cacheManager.getCacheStats();
+    const cacheStats = await cacheManager.getCacheStats();
 
     const scores = await prisma.score.findMany({
       where: {

@@ -11,7 +11,7 @@ export async function POST() {
 
   try {
     await cacheManager.forceUpdate();
-    const stats = cacheManager.getCacheStats();
+    const stats = await cacheManager.getCacheStats();
     
     return NextResponse.json({ 
       message: "Cache updated successfully",
@@ -24,5 +24,20 @@ export async function POST() {
   } catch (err) {
     console.error("Cache refresh failed", err);
     return NextResponse.json({ error: "Failed to refresh cache" }, { status: 500 });
+  }
+}
+
+export async function GET() {
+  try {
+    const stats = await cacheManager.getCacheStats();
+    return NextResponse.json({
+      message: "Cache stats fetched successfully",
+      userCount: stats.userCount,
+      freshDataCount: stats.freshDataCount,
+      lastGlobalUpdate: stats.lastGlobalUpdate,
+    });
+  } catch (error) {
+    console.error("Failed to fetch cache stats", error);
+    return NextResponse.json({ error: "Failed to fetch cache stats" }, { status: 500 });
   }
 }

@@ -5,8 +5,8 @@ import cacheManager from "@/lib/monkeytypeCache";
 
 export async function GET() {
   try {
-    const stats = cacheManager.getCacheStats();
-    const cachedData = cacheManager.getCachedData();
+    const stats = await cacheManager.getCacheStats();
+    const cachedData = await cacheManager.getCachedData();
 
     return NextResponse.json({
       stats,
