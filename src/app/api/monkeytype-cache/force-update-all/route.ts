@@ -1,8 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import cacheManager from '@/lib/monkeytypeCache';
 
-export async function GET() {
-  console.log('API: Received request to force update all Monkeytype cache.');
+export async function GET(req: NextRequest) {
+  if (req.headers.get('Authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  console.log('API: Received authorized request to force update all Monkeytype cache.');
   try {
     // Intentionally not awaiting this, as it can take a while
     // and we want to respond to the uptime bot quickly.
