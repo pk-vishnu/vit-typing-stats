@@ -1,10 +1,15 @@
-/**
- * Centralized Monkeytype Data Cache Manager
- * 
- * This service manages fetching and caching Monkeytype user data with automatic
- * background updates every 5 minutes. It prevents excessive API requests by
- * serving cached data and only refreshing when the cache expires.
- */
+import { Redis } from '@upstash/redis';
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
+
+const USER_KEY_PREFIX = 'user:';
+const META_LAST_GLOBAL_UPDATE_KEY = 'cache:meta:lastGlobalUpdate';
+const META_IS_UPDATING_KEY = 'cache:meta:isUpdating'; // Lock key
+const META_LAST_RATE_LIMIT_TIME_KEY = 'cache:meta:lastRateLimitTime';
+const USER_SET_KEY = 'cache:userset'; // Set of discordIds
 
 interface UserScore {
   wpm15: number | null;
@@ -27,98 +32,81 @@ interface CachedUserData {
   lastError?: string;
 }
 
-interface CacheEntry {
-  data: Map<string, CachedUserData>;
-  lastGlobalUpdate: number;
-  isUpdating: boolean;
-}
-
 class MonkeytypeCacheManager {
-  private cache: CacheEntry = {
-    data: new Map(),
-    lastGlobalUpdate: 0,
-    isUpdating: false,
-  };
-
   private readonly CACHE_DURATION = 5 * 60 * 1000;
   private readonly MAX_FETCH_ATTEMPTS = 3;
   private readonly FETCH_TIMEOUT = 10000;
   private readonly RATE_LIMIT_DELAY = 5 * 60 * 1000;
-  private updateInterval: NodeJS.Timeout | null = null;
-  private lastRateLimitTime = 0;
 
-  constructor() {
-    this.startBackgroundUpdates();
-  }
-
-  private startBackgroundUpdates(): void {
-    if (this.updateInterval) {
-      clearInterval(this.updateInterval);
+  public async getCachedData(): Promise<CachedUserData[]> {
+    const userIds = await redis.smembers(USER_SET_KEY);
+    if (!userIds || userIds.length === 0) {
+      return [];
     }
-
-    setTimeout(() => {
-      this.updateCache();
-    }, 2000);
-
-    this.updateInterval = setInterval(() => {
-      this.updateCache();
-    }, this.CACHE_DURATION);
-
-    console.log('Monkeytype cache manager started - updating every 5 minutes');
+    const userDataPromises = userIds.map(id => redis.get<CachedUserData>(`${USER_KEY_PREFIX}${id}`));
+    const allUserData = await Promise.all(userDataPromises);
+    return allUserData.filter(data => data !== null) as CachedUserData[];
   }
 
-  public stopBackgroundUpdates(): void {
-    if (this.updateInterval) {
-      clearInterval(this.updateInterval);
-      this.updateInterval = null;
-    }
-    console.log('Monkeytype cache manager stopped');
+  public async getCachedUserData(discordId: string): Promise<CachedUserData | null> {
+    const userData = await redis.get<CachedUserData>(`${USER_KEY_PREFIX}${discordId}`);
+    return userData || null;
   }
 
-  public getCachedData(): CachedUserData[] {
-    return Array.from(this.cache.data.values());
-  }
-
-  public getCachedUserData(discordId: string): CachedUserData | null {
-    return this.cache.data.get(discordId) || null;
-  }
-
-  public getCacheStats() {
+  public async getCacheStats() {
     const now = Date.now();
-    const cacheAge = now - this.cache.lastGlobalUpdate;
-    const userCount = this.cache.data.size;
-    const freshDataCount = Array.from(this.cache.data.values())
-      .filter(user => now - user.lastFetched < this.CACHE_DURATION).length;
+    
+    const lastGlobalUpdateStr = await redis.get<number>(META_LAST_GLOBAL_UPDATE_KEY);
+    const lastGlobalUpdate = lastGlobalUpdateStr ? Number(lastGlobalUpdateStr) : 0;
+    
+    const isUpdating = (await redis.exists(META_IS_UPDATING_KEY)) === 1;
+    
+    const userCount = await redis.scard(USER_SET_KEY);
+    
+    let freshDataCount = 0;
+    if (userCount > 0) {
+      const userIds = await redis.smembers(USER_SET_KEY);
+      const userDataPromises = userIds.map(id => redis.get<CachedUserData>(`${USER_KEY_PREFIX}${id}`));
+      const allUserData = await Promise.all(userDataPromises);
+      freshDataCount = allUserData.filter(user => user && (now - user.lastFetched < this.CACHE_DURATION)).length;
+    }
+
+    const cacheAge = lastGlobalUpdate ? now - lastGlobalUpdate : 0;
 
     return {
       userCount,
       freshDataCount,
       staleDataCount: userCount - freshDataCount,
-      lastGlobalUpdate: this.cache.lastGlobalUpdate,
+      lastGlobalUpdate,
       cacheAge,
-      isUpdating: this.cache.isUpdating,
-      nextUpdateIn: Math.max(0, this.CACHE_DURATION - cacheAge),
+      isUpdating,
+      nextUpdateIn: lastGlobalUpdate ? Math.max(0, this.CACHE_DURATION - cacheAge) : this.CACHE_DURATION,
     };
   }
 
   public async forceUpdate(discordId?: string): Promise<void> {
     await this.updateCache(discordId);
   } 
+
   private async updateCache(discordId?: string): Promise<void> {
-    if (this.cache.isUpdating) {
-      console.log('Cache update already in progress, skipping...');
+    const lockAcquired = await redis.set(META_IS_UPDATING_KEY, 'true', { nx: true, ex: 300 });
+    if (!lockAcquired) {
+      console.log('Cache update already in progress (lock held), skipping...');
       return;
     }
 
-    const now = Date.now();
-    if (now - this.lastRateLimitTime < this.RATE_LIMIT_DELAY) {
-      const remainingTime = Math.ceil((this.RATE_LIMIT_DELAY - (now - this.lastRateLimitTime)) / 1000);
-      console.log(`Rate limited. Skipping update. ${remainingTime}s remaining in cooldown.`);
-      return;
-    }
+    try {
+      const now = Date.now();
+      const lastRateLimitTimeStr = await redis.get<number>(META_LAST_RATE_LIMIT_TIME_KEY);
+      const lastRateLimitTime = lastRateLimitTimeStr ? Number(lastRateLimitTimeStr) : 0;
 
-    this.cache.isUpdating = true;
-    const startTime = Date.now();    try {
+      if (now - lastRateLimitTime < this.RATE_LIMIT_DELAY) {
+        const remainingTime = Math.ceil((this.RATE_LIMIT_DELAY - (now - lastRateLimitTime)) / 1000);
+        console.log(`Rate limited. Skipping update. ${remainingTime}s remaining in cooldown.`);
+        return;
+      }
+
+      const startTime = Date.now();
       console.log(`Starting Monkeytype cache update${discordId ? ' for single user' : ''}...`);
 
       let users: Array<{ discordId: string; mtUrl: string }>;
@@ -137,7 +125,7 @@ class MonkeytypeCacheManager {
 
       if (users.length === 0) {
         console.log('ℹNo verified users found, cache update complete');
-        this.cache.lastGlobalUpdate = Date.now();
+        await redis.set(META_LAST_GLOBAL_UPDATE_KEY, Date.now());
         return;
       }
 
@@ -146,7 +134,7 @@ class MonkeytypeCacheManager {
       const successful = results.filter(r => r.status === 'fulfilled').length;
       const failed = results.filter(r => r.status === 'rejected').length;
 
-      this.cache.lastGlobalUpdate = Date.now();
+      await redis.set(META_LAST_GLOBAL_UPDATE_KEY, Date.now());
       const duration = Date.now() - startTime;
 
       console.log(`Cache update complete: ${successful} successful, ${failed} failed (${duration}ms)`);
@@ -159,9 +147,9 @@ class MonkeytypeCacheManager {
 
     } catch (error) {
       console.error('Cache update failed:', error);
-      this.cache.lastGlobalUpdate = Date.now();
+      await redis.set(META_LAST_GLOBAL_UPDATE_KEY, Date.now());
     } finally {
-      this.cache.isUpdating = false;
+      await redis.del(META_IS_UPDATING_KEY);
     }
   }
 
@@ -184,8 +172,8 @@ class MonkeytypeCacheManager {
       
       if (hasRateLimit) {
         console.log('🚫 Rate limit detected, entering cooldown period...');
-        this.lastRateLimitTime = Date.now();
-        break;
+        await redis.set(META_LAST_RATE_LIMIT_TIME_KEY, Date.now());
+        break; 
       }
       
       if (i + batchSize < users.length) {
@@ -244,11 +232,14 @@ class MonkeytypeCacheManager {
   }
 
   private async updateUserData(user: { discordId: string; mtUrl: string }): Promise<void> {
-    const existingData = this.cache.data.get(user.discordId);
+    const userKey = `${USER_KEY_PREFIX}${user.discordId}`;
+    
+    const existingData = await redis.get<CachedUserData>(userKey);
     
     if (existingData && 
         existingData.fetchAttempts >= this.MAX_FETCH_ATTEMPTS &&
-        Date.now() - existingData.lastFetched < 5 * 60 * 1000) {
+        Date.now() - existingData.lastFetched < 5 * 60 * 1000) { 
+      console.log(`Skipping update for ${user.mtUrl}, max fetch attempts reached recently.`);
       return;
     }
 
@@ -264,7 +255,8 @@ class MonkeytypeCacheManager {
         lastError: undefined,
       };
 
-      this.cache.data.set(user.discordId, userData);
+      await redis.set(userKey, JSON.stringify(userData));
+      await redis.sadd(USER_SET_KEY, user.discordId);
 
       await this.updateDatabaseScores(user.discordId, scores);
 
@@ -280,9 +272,13 @@ class MonkeytypeCacheManager {
         lastError: errorMessage,
       };
 
-      this.cache.data.set(user.discordId, userData);
+      await redis.set(userKey, JSON.stringify(userData));
+      await redis.sadd(USER_SET_KEY, user.discordId);
       
       console.warn(`Failed to update ${user.mtUrl}: ${errorMessage}`);
+      if (errorMessage.includes('429') || errorMessage.includes('Rate limited')) {
+        throw error;
+      }
     }
   }
   
@@ -311,18 +307,19 @@ class MonkeytypeCacheManager {
       try {
         const response = await fetch(`https://api.monkeytype.com/users/${username}/profile`, {
           headers: {
-            'User-Agent': 'VIT-Typing-Stats/1.0',
+            'User-Agent': 'VIT-Typing-Stats/1.0', // Keep or update User-Agent as needed
           },
-          signal: AbortSignal.timeout(8000),
+          signal: AbortSignal.timeout(8000), // 8 seconds timeout
         });
 
         if (response.status === 429) {
-          const waitTime = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
+          const waitTime = Math.pow(2, retryCount) * 1000; 
           console.log(`Rate limited for ${username}. Waiting ${waitTime}ms before retry ${retryCount + 1}/${maxRetries}`);
           
           if (retryCount === maxRetries - 1) {
-            this.lastRateLimitTime = Date.now();
-            throw new Error(`Rate limited after ${maxRetries} attempts`);
+            // This specific error will be caught by updateUserData and then processUsersInBatches
+            // to set the global rate limit time in Redis.
+            throw new Error(`Rate limited after ${maxRetries} attempts (429)`);
           }
           
           await new Promise(resolve => setTimeout(resolve, waitTime));
