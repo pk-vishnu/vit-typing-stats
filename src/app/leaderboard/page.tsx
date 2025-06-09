@@ -40,7 +40,7 @@ export default function LeaderboardPage() {
     useEffect(() => {
         const toastId = "loading-scores";
 
-        toast.loading("Loading Leaderboard...", { id: toastId });        const fetchScores = async () => {
+        toast.loading("Loading Leaderboard...", { id: toastId }); const fetchScores = async () => {
             try {
                 const res = await fetch(`/api/leaderboard?testType=${testType}`);
                 if (res.ok) {
@@ -95,11 +95,13 @@ export default function LeaderboardPage() {
         const toastId = toast.loading("Refreshing scores...");
         try {
             const res = await fetch("/api/update-personal-score", { method: "POST" });
+            const data = await res.json();
             if (!res.ok) throw new Error();
             toast.success("Scores refreshed!", { id: toastId });
             localStorage.setItem("lastRefresh", Date.now().toString());
             setCanRefresh(false);
             setCooldownRemaining(REFRESH_COOLDOWN_MS);
+            console.log(data.message);
         } catch {
             toast.error("Failed to refresh", { id: toastId });
         }

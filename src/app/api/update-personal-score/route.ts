@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/primsa";
 import cacheManager from "@/lib/monkeytypeCache";
+import { updateScoresInDb } from "@/lib/updateScoresInDb";
 
 export async function POST() {
   const session = await getServerSession(authOptions);
@@ -33,9 +34,8 @@ export async function POST() {
     }
 
     await cacheManager.forceUpdate(user.discordId);
-    
     const updatedData = await cacheManager.getCachedUserData(user.discordId);
-    
+
     if (!updatedData) {
       console.error(`Failed to fetch updated data for user ${user.discordId} after force update.`);
       return NextResponse.json({ error: "Failed to fetch updated data after force update" }, { status: 500 });
@@ -46,6 +46,8 @@ export async function POST() {
       return NextResponse.json({ error: "Updated data is malformed (missing scores)" }, { status: 500 });
     }
 
+    await updateScoresInDb(user.discordId, updatedData.scores);
+
     const scoreMap = [
       { type: "60", wpm: updatedData.scores.wpm60, raw: updatedData.scores.raw60, accuracy: updatedData.scores.acc60 },
       { type: "30", wpm: updatedData.scores.wpm30, raw: updatedData.scores.raw30, accuracy: updatedData.scores.acc30 },
@@ -53,7 +55,7 @@ export async function POST() {
     ];
 
     return NextResponse.json({ 
-      message: "Scores updated successfully", 
+      message: "Scores updated successfully and written to database", 
       scores: scoreMap,
       lastFetched: updatedData.lastFetched,
       fromCache: false,
