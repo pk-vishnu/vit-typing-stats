@@ -211,7 +211,7 @@ export default function LeaderboardPage() {
                                                                 className="w-8 h-8 sm:w-10 sm:h-10 rounded-full ring-2 ring-gray-700 group-hover:ring-gray-600 transition-all duration-200"
                                                             />
                                                         ) : (
-                                                            <Link href={`/profiles/${score.user.discordId}`}>
+                                                            <Link href={`/profiles/${score.user.username}`}>
                                                                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center ring-2 ring-gray-700 cursor-pointer">
                                                                     <span className="text-gray-300 font-semibold text-sm">
                                                                         {(score.user.displayname || score.user.username).charAt(0).toUpperCase()}
@@ -223,7 +223,7 @@ export default function LeaderboardPage() {
                                                     <div className="flex-1 min-w-0">
 
                                                         <div className="flex items-center gap-2 flex-wrap">
-                                                            <Link href={`/profiles/${score.user.discordId}`}>
+                                                            <Link href={`/profiles/${score.user.username}`}>
                                                                 <span className="text-white font-medium text-sm sm:text-base hover:text-blue-400 transition-colors cursor-pointer truncate">
                                                                     {score.user.displayname || score.user.username}
                                                                 </span>

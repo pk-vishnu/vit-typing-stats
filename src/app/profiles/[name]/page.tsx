@@ -27,10 +27,10 @@ const SocialIcon = ({ label }: { label: string }) => {
     }
 };
 
-export default async function UserProfile({ params }: { params: Promise<{ id: string }> }) {
-    const userId = (await params).id;
-    const user = await prisma.user.findUnique({
-        where: { discordId: userId },
+export default async function UserProfile({ params }: { params: Promise<{ name: string }> }) {
+    const username = (await params).name;
+    const user = await prisma.user.findFirst({
+        where: { username: username },
         include: { scores: true },
     });
 
