@@ -151,47 +151,52 @@ export default function Profile() {
             alert("Failed to delete account.");
         }
     }
+
     return (
         <>
             <Navbar />
             <Toaster />
-            <div className="min-h-screen bg-gradient-to-br from-gray-950 to-black">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div className="min-h-screen bg-neutral-950">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Left Column - Avatar, Discord ID & Actions */}
                         <div className="lg:col-span-1">
-                            <div className="bg-gray-900/30 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-6 shadow-2xl">
+                            <div className="bg-black rounded-xl border border-neutral-900 p-6" style={{ boxShadow: 'inset 0 1px 3px 0 rgba(0, 0, 0, 0.5)' }}>
                                 {/* Avatar Section */}
-                                <div className="text-center mb-6">
+                                <div className="text-center mb-8">
                                     <div className="relative inline-block mb-4">
                                         <img
                                             src={session.user.image}
                                             alt="avatar"
-                                            className="w-24 h-24 sm:w-28 sm:h-28 rounded-full ring-4 ring-gray-700 shadow-2xl mx-auto"
+                                            className="w-28 h-28 rounded-full mx-auto"
                                         />
-                                        <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-gradient-to-r from-green-500 to-emerald-400 rounded-full border-3 border-gray-900 flex items-center justify-center">
+                                        <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 rounded-full border-4 border-black flex items-center justify-center">
                                             <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Discord ID */}
-                                <div className="space-y-3 mb-6">
-                                    <label className="block text-xs text-gray-400 uppercase tracking-wider font-semibold">
-                                        Discord ID
-                                    </label>
-                                    <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/30">
-                                        <p className="text-sm font-mono text-gray-200 break-all text-center">
-                                            {session.user.id}
-                                        </p>
+                                <div className="space-y-4 mb-8">
+                                    <div>
+                                        <label className="block text-xs text-neutral-500 uppercase tracking-wider font-semibold mb-2">
+                                            Discord ID
+                                        </label>
+                                        <div className="bg-neutral-900 rounded-lg p-3 border border-neutral-800">
+                                            <p className="text-sm font-mono text-neutral-300 break-all text-center">
+                                                {session.user.id}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <label className="block text-xs text-gray-400 uppercase tracking-wider font-semibold">
-                                        Discord Username
-                                    </label>
-                                    <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/30">
-                                        <p className="text-sm font-mono text-gray-200 break-all text-center">
-                                            {username}
-                                        </p>
+                                    <div>
+                                        <label className="block text-xs text-neutral-500 uppercase tracking-wider font-semibold mb-2">
+                                            Discord Username
+                                        </label>
+                                        <div className="bg-neutral-900 rounded-lg p-3 border border-neutral-800">
+                                            <p className="text-sm font-mono text-neutral-300 break-all text-center">
+                                                {username}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -201,19 +206,19 @@ export default function Profile() {
                                         <>
                                             <button
                                                 onClick={handleSave}
-                                                className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg shadow-blue-500/25"
+                                                className="w-full px-4 py-3 bg-white text-neutral-950 font-semibold rounded-lg hover:bg-neutral-100 transition-colors"
                                             >
                                                 Save Changes
                                             </button>
                                             <button
                                                 onClick={() => setEditMode(false)}
-                                                className="w-full px-4 py-3 bg-gray-700/50 text-gray-300 font-semibold rounded-xl hover:bg-gray-600/50 transform hover:scale-105 transition-all duration-200 border border-gray-600/50"
+                                                className="w-full px-4 py-3 bg-neutral-900 text-neutral-300 font-medium rounded-lg hover:bg-neutral-800 transition-colors border border-neutral-800"
                                             >
                                                 Cancel
                                             </button>
                                             <button
                                                 onClick={handleDelete}
-                                                className="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-xl hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-200 shadow-lg shadow-red-500/25"
+                                                className="w-full px-4 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
                                             >
                                                 Delete Account
                                             </button>
@@ -221,7 +226,7 @@ export default function Profile() {
                                     ) : (
                                         <button
                                             onClick={() => setEditMode(true)}
-                                            className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg shadow-blue-500/25"
+                                            className="w-full px-4 py-3 bg-white text-neutral-950 font-semibold rounded-lg hover:bg-neutral-100 transition-colors"
                                         >
                                             Edit Profile
                                         </button>
@@ -235,7 +240,7 @@ export default function Profile() {
                             {/* College Email & Monkeytype in a row on larger screens */}
                             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                                 {/* College Email Section */}
-                                <div className="bg-gray-900/30 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-6 shadow-2xl">
+                                <div className="bg-black rounded-xl border border-neutral-900 p-6" style={{ boxShadow: 'inset 0 1px 3px 0 rgba(0, 0, 0, 0.5)' }}>
                                     <CollegeEmailSection
                                         editMode={editMode}
                                         email={email}
@@ -249,7 +254,7 @@ export default function Profile() {
                                 </div>
 
                                 {/* Monkeytype Section */}
-                                <div className="bg-gray-900/30 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-6 shadow-2xl">
+                                <div className="bg-black rounded-xl border border-neutral-900 p-6" style={{ boxShadow: 'inset 0 1px 3px 0 rgba(0, 0, 0, 0.5)' }}>
                                     <MonkeytypeSection
                                         editMode={editMode}
                                         mtUrl={mtUrl}
@@ -260,7 +265,7 @@ export default function Profile() {
                                 </div>
                             </div>
                             {/* Basic Info Section */}
-                            <div className="bg-gray-900/30 backdrop-blur-sm rounded-2xl border border-gray-800/50 p-6 shadow-2xl">
+                            <div className="bg-black rounded-xl border border-neutral-900 p-6" style={{ boxShadow: 'inset 0 1px 3px 0 rgba(0, 0, 0, 0.5)' }}>
                                 <BasicInfoSection
                                     editMode={editMode}
                                     displayname={displayname}
@@ -284,19 +289,19 @@ export default function Profile() {
                             <>
                                 <button
                                     onClick={handleSave}
-                                    className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg shadow-blue-500/25"
+                                    className="px-8 py-3 bg-white text-neutral-950 font-semibold rounded-lg hover:bg-neutral-100 transition-colors"
                                 >
                                     Save Changes
                                 </button>
                                 <button
                                     onClick={() => setEditMode(false)}
-                                    className="px-8 py-3 bg-gray-700/50 text-gray-300 font-semibold rounded-xl hover:bg-gray-600/50 transform hover:scale-105 transition-all duration-200 border border-gray-600/50"
+                                    className="px-8 py-3 bg-neutral-900 text-neutral-300 font-medium rounded-lg hover:bg-neutral-800 transition-colors border border-neutral-800"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleDelete}
-                                    className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-xl hover:from-red-700 hover:to-red-800 transform hover:scale-105 transition-all duration-200 shadow-lg shadow-red-500/25"
+                                    className="px-8 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
                                 >
                                     Delete Account
                                 </button>
@@ -304,7 +309,7 @@ export default function Profile() {
                         ) : (
                             <button
                                 onClick={() => setEditMode(true)}
-                                className="px-10 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg shadow-blue-500/25"
+                                className="px-10 py-3 bg-white text-neutral-950 font-semibold rounded-lg hover:bg-neutral-100 transition-colors"
                             >
                                 Edit Profile
                             </button>

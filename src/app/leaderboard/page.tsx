@@ -39,8 +39,8 @@ export default function LeaderboardPage() {
 
     useEffect(() => {
         const toastId = "loading-scores";
-
-        toast.loading("Loading Leaderboard...", { id: toastId }); const fetchScores = async () => {
+        toast.loading("Loading Leaderboard...", { id: toastId });
+        const fetchScores = async () => {
             try {
                 const res = await fetch(`/api/leaderboard?testType=${testType}`);
                 if (res.ok) {
@@ -111,40 +111,43 @@ export default function LeaderboardPage() {
         <>
             <Navbar />
             <Toaster />
-            <div className="min-h-screen bg-gradient-to-br from-gray-950 to-black">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="min-h-screen bg-neutral-950">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     {/* Header Section */}
-                    <div className="text-center mb-6">
-                        <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-4">
-                            Leaderboards
+                    <div className="mb-12">
+                        <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">
+                            Leaderboard
                         </h1>
-                        <p className="text-gray-400 text-sm sm:text-base font-mono max-w-2xl mx-auto">
-                            Top 50 Fastest Typists in Vellore Institute of Technology
+                        <p className="text-neutral-400 text-base">
+                            Top 50 fastest typists at Vellore Institute of Technology
                         </p>
                     </div>
 
-                    {/* Test Type Selector */}
-                    <div className="flex flex-wrap justify-center gap-2 mb-8">
-                        {TEST_TYPES.map((type) => (
-                            <button
-                                key={type}
-                                onClick={() => setTestType(type)}
-                                className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 transform hover:scale-105 ${testType === type
-                                    ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25"
-                                    : "bg-gray-800/50 text-gray-300 hover:bg-gray-700/70 border border-gray-700/50"
-                                    }`}
-                            >
-                                {type}s
-                            </button>
-                        ))}
-                    </div>
-                    <div className="flex justify-end mb-4">
+                    {/* Controls Bar */}
+                    <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+                        {/* Test Type Selector */}
+                        <div className="flex gap-2">
+                            {TEST_TYPES.map((type) => (
+                                <button
+                                    key={type}
+                                    onClick={() => setTestType(type)}
+                                    className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${testType === type
+                                        ? "bg-white text-neutral-950"
+                                        : "bg-neutral-900 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300"
+                                        }`}
+                                >
+                                    {type}s
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Refresh Button */}
                         <button
                             onClick={handleManualRefresh}
                             disabled={!canRefresh}
-                            className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 ${canRefresh
-                                ? " hover:bg-gray-700 text-white"
-                                : "bg-gray-700 text-gray-400 cursor-not-allowed"
+                            className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${canRefresh
+                                ? "bg-neutral-900 text-neutral-300 hover:bg-neutral-800"
+                                : "bg-neutral-900/50 text-neutral-600 cursor-not-allowed"
                                 }`}
                         >
                             {canRefresh
@@ -154,46 +157,55 @@ export default function LeaderboardPage() {
                     </div>
 
                     {/* Leaderboard Table */}
-                    <div className="bg-gray-900/30 backdrop-blur-sm rounded-2xl border border-gray-800/50 overflow-hidden shadow-2xl">
+                    <div className="bg-black rounded-xl border border-neutral-900 overflow-hidden shadow-inner" style={{ boxShadow: 'inset 0 1px 3px 0 rgba(0, 0, 0, 0.5)' }}>
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="bg-gradient-to-r from-gray-800/80 to-gray-900/80 backdrop-blur-sm">
-                                        <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                                    <tr className="bg-neutral-950 border-b border-neutral-900">
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
                                             Rank
                                         </th>
-                                        <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
                                             User
                                         </th>
-                                        <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
                                             WPM
                                         </th>
-                                        <th className="hidden sm:table-cell px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                                        <th className="hidden sm:table-cell px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
                                             Raw
                                         </th>
-                                        <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
                                             Accuracy
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-800/50">
+                                <tbody className="divide-y divide-neutral-900">
                                     {scores.map((score, i) => (
                                         <tr
                                             key={i}
-                                            className="hover:bg-gray-800/30 transition-colors duration-200 group"
+                                            className="hover:bg-neutral-950 transition-colors"
                                         >
                                             {/* Rank */}
-                                            <td className="px-4 sm:px-6 py-4">
+                                            <td className="px-6 py-4">
                                                 <div className="flex items-center">
                                                     {i < 3 ? (
-                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${i === 0 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-yellow-900' :
-                                                            i === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-500 text-gray-900' :
-                                                                'bg-gradient-to-r from-orange-400 to-orange-600 text-orange-900'
-                                                            }`}>
-                                                            {i + 1}
+                                                        <div className="relative">
+                                                            <div
+                                                                className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm relative z-10 ${i === 0
+                                                                    ? "bg-amber-400 text-amber-950 shadow-lg shadow-amber-500/20"
+                                                                    : i === 1
+                                                                        ? "bg-slate-300 text-slate-900 shadow-lg shadow-slate-400/20"
+                                                                        : "bg-amber-600 text-amber-950 shadow-lg shadow-amber-600/20"
+                                                                    }`}
+                                                            >
+                                                                {i + 1}
+                                                            </div>
+                                                            {i === 0 && (
+                                                                <div className="absolute inset-0 bg-amber-400 rounded-lg blur-sm opacity-30 animate-pulse"></div>
+                                                            )}
                                                         </div>
                                                     ) : (
-                                                        <span className="text-gray-400 font-mono text-sm w-8 text-center">
+                                                        <span className="text-neutral-500 font-semibold text-sm w-9 h-9 flex items-center justify-center bg-neutral-900 rounded-lg">
                                                             {i + 1}
                                                         </span>
                                                     )}
@@ -201,19 +213,19 @@ export default function LeaderboardPage() {
                                             </td>
 
                                             {/* User */}
-                                            <td className="px-4 sm:px-6 py-4">
+                                            <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
                                                     <div className="flex-shrink-0">
                                                         {score.user.avatarUrl ? (
                                                             <img
                                                                 src={score.user.avatarUrl}
                                                                 alt="avatar"
-                                                                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full ring-2 ring-gray-700 group-hover:ring-gray-600 transition-all duration-200"
+                                                                className="w-10 h-10 rounded-full"
                                                             />
                                                         ) : (
                                                             <Link href={`/profiles/${score.user.username}`}>
-                                                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center ring-2 ring-gray-700 cursor-pointer">
-                                                                    <span className="text-gray-300 font-semibold text-sm">
+                                                                <div className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center cursor-pointer hover:bg-neutral-700 transition-colors">
+                                                                    <span className="text-neutral-300 font-semibold text-sm">
                                                                         {(score.user.displayname || score.user.username).charAt(0).toUpperCase()}
                                                                     </span>
                                                                 </div>
@@ -221,21 +233,20 @@ export default function LeaderboardPage() {
                                                         )}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-
                                                         <div className="flex items-center gap-2 flex-wrap">
                                                             <Link href={`/profiles/${score.user.username}`}>
-                                                                <span className="text-white font-medium text-sm sm:text-base hover:text-blue-400 transition-colors cursor-pointer truncate">
+                                                                <span className="text-white font-medium text-base hover:text-neutral-300 transition-colors cursor-pointer">
                                                                     {score.user.displayname || score.user.username}
                                                                 </span>
                                                             </Link>
-                                                            <div className="flex gap-1">
+                                                            <div className="flex gap-1.5">
                                                                 {score.user.mtVerified && (
                                                                     <span
                                                                         className="text-green-400 text-xs"
                                                                         title="Verified Monkeytype account"
                                                                     >
-                                                                        <div className="w-8 h-8 overflow-hidden">
-                                                                            <img src="/mtLogo.png" alt="Logo" className="w-full h-full object-cover" />
+                                                                        <div className="w-5 h-5 overflow-hidden">
+                                                                            <img src="/mtLogo.png" alt="Monkeytype" className="w-full h-full object-cover" />
                                                                         </div>
                                                                     </span>
                                                                 )}
@@ -244,42 +255,41 @@ export default function LeaderboardPage() {
                                                                         className="text-blue-400 text-xs"
                                                                         title="Verified VIT College Email"
                                                                     >
-                                                                        <div className="w-8 h-8 overflow-hidden">
-                                                                            <img src="/verified.png" alt="Logo" className="w-full h-full object-cover" />
+                                                                        <div className="w-5 h-5 overflow-hidden">
+                                                                            <img src="/verified.png" alt="Verified" className="w-full h-full object-cover" />
                                                                         </div>
                                                                     </span>
                                                                 )}
                                                             </div>
-
                                                         </div>
                                                     </div>
                                                 </div>
                                             </td>
 
                                             {/* WPM */}
-                                            < td className="px-4 sm:px-6 py-4" >
-                                                <span className="text-white font-bold text-lg sm:text-xl">
+                                            <td className="px-6 py-4">
+                                                <span className="text-white font-bold text-xl">
                                                     {score.wpm}
                                                 </span>
                                             </td>
 
-                                            {/* Raw - Hidden on mobile */}
-                                            <td className="hidden sm:table-cell px-4 sm:px-6 py-4">
-                                                <span className="text-gray-400 font-mono">
+                                            {/* Raw */}
+                                            <td className="hidden sm:table-cell px-6 py-4">
+                                                <span className="text-neutral-400 font-medium">
                                                     {score.raw ?? "—"}
                                                 </span>
                                             </td>
 
                                             {/* Accuracy */}
-                                            <td className="px-4 sm:px-6 py-4">
-                                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                                                    <span className="text-gray-300 font-medium">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-neutral-300 font-medium min-w-[3rem]">
                                                         {score.accuracy ? `${score.accuracy}%` : "—"}
                                                     </span>
                                                     {score.accuracy && (
-                                                        <div className="w-full sm:w-16 bg-gray-700 rounded-full h-1.5">
+                                                        <div className="w-20 bg-neutral-800 rounded-full h-2">
                                                             <div
-                                                                className="bg-gradient-to-r from-green-500 to-emerald-400 h-1.5 rounded-full transition-all duration-300"
+                                                                className="bg-emerald-500 h-2 rounded-full transition-all"
                                                                 style={{ width: `${score.accuracy}%` }}
                                                             ></div>
                                                         </div>
@@ -294,21 +304,23 @@ export default function LeaderboardPage() {
 
                         {/* Empty State */}
                         {scores.length === 0 && (
-                            <div className="text-center py-16">
-                                <div className="text-6xl mb-4 opacity-20">⌨️</div>
-                                <p className="text-gray-500 text-lg font-medium">No scores found</p>
-                                <p className="text-gray-600 text-sm mt-2">Be the first to set a record!</p>
+                            <div className="text-center py-20">
+                                <div className="text-6xl mb-4 opacity-10">⌨️</div>
+                                <p className="text-neutral-500 text-lg font-medium">No scores found</p>
+                                <p className="text-neutral-600 text-sm mt-2">Be the first to set a record!</p>
                             </div>
                         )}
-                    </div>                    {/* Footer Stats */}
-                    <div className="mt-8 text-center space-y-2">
-                        <p className="text-gray-600 text-sm">
+                    </div>
+
+                    {/* Footer Stats */}
+                    <div className="mt-6 text-center">
+                        <p className="text-neutral-600 text-sm">
                             Showing top {scores.length} players • Updated automatically every 2 minutes
                             {cacheStats && cacheStats.isUpdating ? " (Updating...)" : ""}
                         </p>
                     </div>
-                </div >
-            </div >
+                </div>
+            </div>
         </>
     );
 }
