@@ -22,7 +22,6 @@ export async function POST() {
     const index = Math.floor(parseInt(discordId) / Math.pow(2, 22)) % 6;
     avatarUrl = `https://cdn.discordapp.com/embed/avatars/${index}.png`;
   }
-  console.log(avatarUrl)
 
   await prisma.user.update({
     where: { discordId },
