@@ -10,9 +10,10 @@ import toast, { Toaster } from 'react-hot-toast';
 import { signOut } from "next-auth/react";
 
 export default function Profile() {
-    const { data: session, status } = useSession();
-    const [editMode, setEditMode] = useState(false);
+    const { data: session, status, update } = useSession();
 
+    const [editMode, setEditMode] = useState(false);
+    const [refreshingAvatar, setRefreshingAvatar] = useState(false);
     const [username, setUsername] = useState("");
     const [displayname, setDisplayname] = useState("");
     const [email, setEmail] = useState("");
@@ -52,11 +53,42 @@ export default function Profile() {
                 toast.error("Something went wrong.", { id: toastId });
             }
         };
-        fetchUserData();
+        if (session) fetchUserData();
     }, [session]);
 
     if (status === "loading") return <p>Loading...</p>;
     if (!session) return <p>You&apos;re not signed in.</p>;
+
+    const handleRefreshAvatar = async () => {
+        if (refreshingAvatar) return;
+        setRefreshingAvatar(true);
+        const toastId = toast.loading("Syncing with Discord...");
+
+        try {
+            const res = await fetch("/api/user/refresh-avatar", {
+                method: "POST",
+            });
+
+            if (!res.ok) throw new Error("Failed to fetch from Discord");
+
+            const data = await res.json();
+
+            await update({
+                ...session,
+                user: {
+                    ...session?.user,
+                    image: data.url,
+                },
+            });
+
+            toast.success("Avatar updated!", { id: toastId });
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to sync avatar", { id: toastId });
+        } finally {
+            setRefreshingAvatar(false);
+        }
+    };
 
     const handleSave = async () => {
         const res = await fetch("/api/user", {
@@ -75,6 +107,9 @@ export default function Profile() {
 
         if (res.ok) {
             setEditMode(false);
+            toast.success("Changes saved successfully.");
+        } else {
+            toast.error("Failed to save changes.");
         }
     };
 
@@ -162,17 +197,44 @@ export default function Profile() {
                         {/* Left Column - Avatar, Discord ID & Actions */}
                         <div className="lg:col-span-1">
                             <div className="bg-black rounded-xl border border-neutral-900 p-6" style={{ boxShadow: 'inset 0 1px 3px 0 rgba(0, 0, 0, 0.5)' }}>
+
                                 {/* Avatar Section */}
                                 <div className="text-center mb-8">
                                     <div className="relative inline-block mb-4">
                                         <img
                                             src={session.user.image}
                                             alt="avatar"
-                                            className="w-28 h-28 rounded-full mx-auto"
+                                            className="w-28 h-28 rounded-full mx-auto object-cover"
                                         />
                                         <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 rounded-full border-4 border-black flex items-center justify-center">
                                             <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
                                         </div>
+                                    </div>
+
+                                    {/* sync avatar button */}
+                                    <div className="flex justify-center">
+                                        <button
+                                            onClick={handleRefreshAvatar}
+                                            disabled={refreshingAvatar}
+                                            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 text-xs font-medium hover:text-white hover:border-neutral-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="12"
+                                                height="12"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                className={refreshingAvatar ? "animate-spin" : ""}
+                                            >
+                                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                                <path d="M3 3v5h5" />
+                                            </svg>
+                                            {refreshingAvatar ? "Syncing..." : "Sync Avatar"}
+                                        </button>
                                     </div>
                                 </div>
 
@@ -237,9 +299,7 @@ export default function Profile() {
 
                         {/* Right Column - Profile Sections */}
                         <div className="lg:col-span-2 space-y-6">
-                            {/* College Email & Monkeytype in a row on larger screens */}
                             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                                {/* College Email Section */}
                                 <div className="bg-black rounded-xl border border-neutral-900 p-6" style={{ boxShadow: 'inset 0 1px 3px 0 rgba(0, 0, 0, 0.5)' }}>
                                     <CollegeEmailSection
                                         editMode={editMode}
@@ -253,7 +313,6 @@ export default function Profile() {
                                     />
                                 </div>
 
-                                {/* Monkeytype Section */}
                                 <div className="bg-black rounded-xl border border-neutral-900 p-6" style={{ boxShadow: 'inset 0 1px 3px 0 rgba(0, 0, 0, 0.5)' }}>
                                     <MonkeytypeSection
                                         editMode={editMode}
@@ -264,7 +323,6 @@ export default function Profile() {
                                     />
                                 </div>
                             </div>
-                            {/* Basic Info Section */}
                             <div className="bg-black rounded-xl border border-neutral-900 p-6" style={{ boxShadow: 'inset 0 1px 3px 0 rgba(0, 0, 0, 0.5)' }}>
                                 <BasicInfoSection
                                     editMode={editMode}
@@ -287,36 +345,15 @@ export default function Profile() {
                     <div className="mt-8 lg:hidden flex flex-col gap-3">
                         {editMode ? (
                             <>
-                                <button
-                                    onClick={handleSave}
-                                    className="px-8 py-3 bg-white text-neutral-950 font-semibold rounded-lg hover:bg-neutral-100 transition-colors"
-                                >
-                                    Save Changes
-                                </button>
-                                <button
-                                    onClick={() => setEditMode(false)}
-                                    className="px-8 py-3 bg-neutral-900 text-neutral-300 font-medium rounded-lg hover:bg-neutral-800 transition-colors border border-neutral-800"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={handleDelete}
-                                    className="px-8 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
-                                >
-                                    Delete Account
-                                </button>
+                                <button onClick={handleSave} className="px-8 py-3 bg-white text-neutral-950 font-semibold rounded-lg hover:bg-neutral-100 transition-colors">Save Changes</button>
+                                <button onClick={() => setEditMode(false)} className="px-8 py-3 bg-neutral-900 text-neutral-300 font-medium rounded-lg hover:bg-neutral-800 transition-colors border border-neutral-800">Cancel</button>
+                                <button onClick={handleDelete} className="px-8 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors">Delete Account</button>
                             </>
                         ) : (
-                            <button
-                                onClick={() => setEditMode(true)}
-                                className="px-10 py-3 bg-white text-neutral-950 font-semibold rounded-lg hover:bg-neutral-100 transition-colors"
-                            >
-                                Edit Profile
-                            </button>
+                            <button onClick={() => setEditMode(true)} className="px-10 py-3 bg-white text-neutral-950 font-semibold rounded-lg hover:bg-neutral-100 transition-colors">Edit Profile</button>
                         )}
                     </div>
 
-                    {/* Footer Space */}
                     <div className="h-8"></div>
                 </div>
             </div>
